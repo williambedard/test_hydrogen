@@ -1,0 +1,21 @@
+name: 'Create deployment on GitHub'
+branding:
+  icon: shopping-bag
+  colour: green
+description: 'Sends a request to GitHub in order to track deployment'
+inputs:
+  environment:
+    description: 'Deployment environment'
+    required: true
+  preview_url:
+    description: 'Preview URL'
+  description:
+    description: 'Deployment description'
+    default: ''
+  token:
+    description: 'GitHub token'
+    required: true
+
+runs:
+  using: 'node12'
+  main: 'index.js'
