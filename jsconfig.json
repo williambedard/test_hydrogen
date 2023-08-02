@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "paths": {
+      "@shopify/hydrogen": ["./node_modules/@shopify/h2-internal"],
+      "@shopify/hydrogen/*": ["./node_modules/@shopify/h2-internal/*"]
+    }
+  }
+}
