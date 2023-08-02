@@ -1,0 +1,59 @@
+name: Deploy
+on: [push]
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v2
+
+      # Hack to download node deps before h2 is public:
+      - name: .npmrc hack
+        run: |
+          cat <<-EOF > .npmrc
+          @shopify:registry=https://npm.shopify.io/node/
+          //npm.shopify.io/node/:_authToken=${{ secrets.NPM_TOKEN }}
+          EOF
+
+      # Install dependencies
+      - name: Setup node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          check-latest: true
+      - name: Get yarn cache directory
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Install dependencies
+        run: yarn
+
+      # Production build
+      - name: Build
+        run: yarn build
+
+      # Deploy to Oxygen
+      - name: Deploy
+        id: oxygen-deploy
+        uses: ./.github/actions/oxygenctl-action
+        with:
+          oxygen_deployment_token: ${{ secrets.OXYGEN_DEPLOYMENT_TOKEN }}
+
+      # Create GitHub Deployment for tracking deploy
+      - name: Create GitHub Deployment
+        uses: ./.github/actions/github-deployment-action
+        with:
+          ref: ${{ github.ref }}
+          sha: ${{ github.sha }}
+          token: ${{ github.token }}
+          creator: ${{ github.actor }}
+          environment: 'production'
+          preview_url: ${{ steps.oxygen-deploy.outputs.url }}
+          description: ${{ github.event.head_commit.message }}
+
