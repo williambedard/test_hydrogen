@@ -1,0 +1,25 @@
+name: 'Create deployment on GitHub'
+branding:
+  icon: shopping-bag
+  colour: green
+description: 'Sends a request to GitHub in order to track deployment'
+inputs:
+  ref:
+    description: 'Branch to be deployed'
+    required: true
+  sha:
+    description: 'Commit sha to be deployed'
+    required: true
+  payload:
+    description: 'Additional information to be shared through the context'
+    required: true
+  environment:
+    description: 'Environment the deploy will happen in'
+    required: true
+  description:
+    description: 'Description of the deploy'
+    default: ''
+
+runs:
+  using: 'node12'
+  main: 'index.js'
